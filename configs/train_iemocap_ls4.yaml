@@ -1,0 +1,39 @@
+seed: 42
+data:
+  protocol: loso
+  feature_paths:
+    - dataset/IEMOCAP/session_data/ses_1.parquet
+    - dataset/IEMOCAP/session_data/ses_2.parquet
+    - dataset/IEMOCAP/session_data/ses_3.parquet
+    - dataset/IEMOCAP/session_data/ses_4.parquet
+    - dataset/IEMOCAP/session_data/ses_5.parquet
+  metadata_paths: []
+  val_strategy: cyclic_next
+  norm_mode: fixed_db
+loader:
+  batch_size: 32
+  num_workers: 0
+model:
+  model_name: Lite_GLSER
+  input_dim: 80
+  hidden_dim: 256
+  num_ls4_layers: 3
+  num_da_ls4_layers: 3
+  d_state: 32
+  p_order: 3
+  output_dim: 3
+  dropout: 0.4
+  noise_frontend: identity
+label_refiner:
+  sigma: 0.05
+loss:
+  task_importance: [1.5, 1.0, 1.0]
+optimizer:
+  lr: 0.00005
+  weight_decay: 0.05
+scheduler:
+  factor: 0.5
+  patience: 15
+training:
+  epochs: 300
+  early_stop: 50

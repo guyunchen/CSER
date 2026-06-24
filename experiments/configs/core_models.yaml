@@ -1,0 +1,42 @@
+group: core_models
+save_checkpoints: true
+seeds: [42, 3407, 2026]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+experiments:
+  A0:
+    name: cfc_identity
+    sequence_core: cfc
+    noise_frontend: identity
+  A1:
+    name: s4_identity
+    sequence_core: s4
+    noise_frontend: identity
+  A2:
+    name: da_ls4_identity
+    sequence_core: da_ls4
+    noise_frontend: identity
+  A3:
+    name: lite_glser
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+  A4:
+    name: original_ls4
+    sequence_core: original_ls4
+    noise_frontend: identity
+    num_ls4_layers: 2
+    d_state: 64
+    p_order: 2
+    original_liquid_kernel: polyb
+    dropout: 0.3
+    optimizer:
+      lr: 0.001

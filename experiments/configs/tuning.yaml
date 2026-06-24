@@ -1,0 +1,49 @@
+group: tuning
+save_checkpoints: true
+seeds: [42]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+    norm_mode: fixed_db80
+  training:
+    epochs: 160
+    early_stop: 30
+experiments:
+  T0:
+    name: db80_baseline
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+
+  T1:
+    name: db80_lr1e4
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    optimizer:
+      lr: 0.0001
+
+  T2:
+    name: db80_dropout03
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.3
+
+  T3:
+    name: db80_valence2
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    loss:
+      task_importance: [2.0, 1.0, 1.0]
+
+  T4:
+    name: db80_identity_frontend
+    sequence_core: da_ls4
+    noise_frontend: identity

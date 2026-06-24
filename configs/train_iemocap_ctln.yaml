@@ -1,0 +1,38 @@
+seed: 42
+data:
+  protocol: loso
+  feature_paths:
+    - dataset/IEMOCAP/session_data/ses_1.parquet
+    - dataset/IEMOCAP/session_data/ses_2.parquet
+    - dataset/IEMOCAP/session_data/ses_3.parquet
+    - dataset/IEMOCAP/session_data/ses_4.parquet
+    - dataset/IEMOCAP/session_data/ses_5.parquet
+  metadata_paths: []
+  val_strategy: cyclic_next
+  norm_mode: fixed_db
+loader:
+  batch_size: 32
+  num_workers: 0
+model:
+  input_dim: 80
+  hidden_dim: 256
+  num_liquid_layers: 2
+  output_dim: 2
+  dropout: 0.4
+spec_aug:
+  freq_mask_range: 15
+  time_mask_range: 40
+label_refiner:
+  sigma: 0.05
+loss:
+  mse_weight: 0.2
+  task_importance: [1.5, 1.0]
+optimizer:
+  lr: 0.0001
+  weight_decay: 0.01
+scheduler:
+  factor: 0.5
+  patience: 7
+training:
+  epochs: 100
+  early_stop: 20

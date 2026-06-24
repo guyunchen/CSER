@@ -1,0 +1,33 @@
+seed: 42
+data:
+  train_path: dataset/MESS/train.parquet
+  test_path: dataset/MESS/test.parquet
+  norm_mode: fixed_db
+loader:
+  batch_size: 16
+  num_workers: 0
+model:
+  input_dim: 80
+  hidden_dim: 256
+  num_ls4_layers: 3
+  d_state: 32
+  p_order: 3
+  output_dim: 2
+  dropout: 0.4
+label_refiner:
+  sigma: 0.05
+loss:
+  ccc_weight: 0.6
+  corr_weight: 0.2
+  mse_weight: 0.1
+  smooth_weight: 0.1
+  task_importance: [1.2, 1.0]
+optimizer:
+  lr: 0.00005
+  weight_decay: 0.05
+scheduler:
+  factor: 0.5
+  patience: 15
+training:
+  epochs: 400
+  early_stop: 60

@@ -1,0 +1,34 @@
+# 增加到你的 api_config.yaml 中
+SER_DATA_DIR: "dataset/IEMOCAP/random_data"  # 原始音频或 ASR 文本路径
+DISTILL_DATA_OUTPUT: "/output/distill_data.jsonl"
+
+# LLM 服务连接配置（百度千帆 - DeepSeek-V3.2 正确配置）
+API_Config:
+
+#  API_BASE: "https://qianfan.baidubce.com/v2"
+#  # 你的百度API_KEY（不变）
+#  API_KEY: "bce-v3/ALTAK-fzw3sKGOyv87mfYrvok7W/88d5092c75e7cfaf089e8858c6714163e090436e"
+#  # 模型名（不变）
+#  MODEL_NAME: "deepseek-v3.2"
+  TIMEOUT_SECS: 120
+  CONCURRENCY: 5  # 同时进行的请求数量
+  RETRY_LIMIT: 3  # 失败重试次数
+
+#  API_BASE: "http://192.168.71.130:9996/v1"
+#  API_KEY: "sk-ZDQpFK3a704bk9JxUPlpzKOXamGw0fs5ZVlT6UdA7y5ma3QF"
+#  MODEL_NAME: "gemma-3-it"
+
+#  API_BASE: "http://192.168.71.130:9996/v1"
+#  API_KEY: "49aec825a7dd4c5082408e62495a617d.kkZBrQcChDN6ohaD"
+#  MODEL_NAME: "gemma-3-it"
+
+  API_BASE: "https://api.suanli.cn/v1"
+  API_KEY: "sk-ZDQpFK3a704bk9JxUPlpzKOXamGw0fs5ZVlT6UdA7y5ma3QF"
+  MODEL_NAME: "Qwen/QwQ-32B"
+
+  PARAMS:
+    temperature: 0.3      # 调低随机性，确保逻辑推理的一致性
+    top_p: 0.9            # 保证回复质量的同时保留一定的多样性
+    max_tokens: 1024      # 预留足够的长度给 Reasoning 过程
+    presence_penalty: 0.0
+    frequency_penalty: 0.0

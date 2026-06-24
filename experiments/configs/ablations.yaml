@@ -1,0 +1,52 @@
+group: ablations
+save_checkpoints: false
+seeds: [42]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+  sequence_core: da_ls4
+  noise_frontend: gated_robust
+  training:
+    early_stop: 30
+experiments:
+  C0:
+    name: remove_sequence_core
+    remove_sequence_core: true
+  C1:
+    name: remove_attention
+    remove_attention: true
+  C2:
+    name: disable_ls4_dynamic
+    disable_ls4_dynamic: true
+  C3:
+    name: p_order_1
+    p_order: 1
+  C4:
+    name: d_state_16
+    d_state: 16
+  C5:
+    name: d_state_64
+    d_state: 64
+  C6:
+    name: identity_frontend
+    noise_frontend: identity
+  C7:
+    name: disable_feature_aug
+    disable_feature_aug: true
+  C8:
+    name: disable_label_refine
+    disable_label_refine: true
+  C9:
+    name: ccc_only_loss
+    loss_type: ccc_only
+  C10:
+    name: no_valence_boost
+    task_importance: [1.0, 1.0, 1.0]

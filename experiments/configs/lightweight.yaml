@@ -1,0 +1,38 @@
+group: lightweight
+save_checkpoints: true
+seeds: [42]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+  sequence_core: da_ls4
+  noise_frontend: identity
+experiments:
+  B0:
+    name: tiny
+    hidden_dim: 128
+    num_ls4_layers: 2
+    d_state: 16
+  B1:
+    name: full
+    hidden_dim: 256
+    num_ls4_layers: 2
+    d_state: 32
+  B2:
+    name: large
+    hidden_dim: 384
+    num_ls4_layers: 4
+    d_state: 64
+  B3:
+    name: gated_full
+    hidden_dim: 256
+    num_ls4_layers: 2
+    d_state: 32
+    noise_frontend: gated_robust

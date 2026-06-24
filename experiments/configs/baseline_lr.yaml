@@ -1,0 +1,73 @@
+group: baseline_lr
+save_checkpoints: true
+seeds: [2026]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+    norm_mode: fixed_db
+  optimizer:
+    lr: 0.0003
+  training:
+    epochs: 160
+    early_stop: 30
+experiments:
+  B0:
+    name: a3_lr3e4
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+
+  B1:
+    name: a3_lr3e4_dropout035
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.35
+
+  B2:
+    name: a3_lr3e4_wd003
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    optimizer:
+      weight_decay: 0.03
+
+  B3:
+    name: a3_lr3e4_dropout035_wd003
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.35
+    optimizer:
+      weight_decay: 0.03
+
+  B4:
+    name: a3_lr3e4_dropout035_wd004
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.35
+    optimizer:
+      weight_decay: 0.04
+
+  B5:
+    name: a3_lr3e4_dropout0375_wd003
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.375
+    optimizer:
+      weight_decay: 0.03
+
+  B6:
+    name: a3_lr3e4_dropout0325
+    sequence_core: da_ls4
+    noise_frontend: gated_robust
+    model:
+      dropout: 0.325
