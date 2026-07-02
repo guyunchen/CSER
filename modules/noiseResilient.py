@@ -162,3 +162,82 @@ class ConservativeRobustRefinement(nn.Module):
         delta = self.max_delta * torch.tanh((denoised - x) / self.max_delta)
         mix = self.max_mix * torch.sigmoid(self.mix_logit)
         return x + mix * delta
+
+
+class SubBandDeepFilterLite(nn.Module):
+    """
+    Lightweight feature-domain denoising frontend for Log-Mel inputs.
+
+    The block borrows the practical shape of modern speech enhancement models:
+    local temporal filtering, sub-band noise cues, and a conservative residual
+    path. It is initialized close to identity so it can be inserted before the
+    encoder without immediately overwriting emotion-bearing cues.
+    """
+
+    def __init__(
+        self,
+        input_dim=80,
+        reduction=4,
+        kernel_size=5,
+        max_mix=0.45,
+        max_delta=0.35,
+        init_mix_logit=-2.0,
+    ):
+        super().__init__()
+        if kernel_size % 2 == 0:
+            raise ValueError("kernel_size must be odd.")
+
+        hidden_dim = max(input_dim // reduction, 16)
+        self.max_mix = max_mix
+        self.max_delta = max_delta
+        self.mix_logit = nn.Parameter(torch.tensor(float(init_mix_logit)))
+
+        self.local_filter = nn.Conv1d(
+            input_dim,
+            input_dim,
+            kernel_size=kernel_size,
+            padding=kernel_size // 2,
+            groups=input_dim,
+            bias=False,
+        )
+        self._init_smoothing_filter(kernel_size)
+
+        self.subband_gate = nn.Sequential(
+            nn.Linear(input_dim * 4, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, input_dim),
+            nn.Sigmoid(),
+        )
+        self.residual_filter = nn.Sequential(
+            nn.Linear(input_dim * 2, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, input_dim),
+        )
+        nn.init.zeros_(self.residual_filter[-1].weight)
+        nn.init.zeros_(self.residual_filter[-1].bias)
+
+    def _init_smoothing_filter(self, kernel_size):
+        with torch.no_grad():
+            self.local_filter.weight.fill_(1.0 / kernel_size)
+
+    def forward(self, x):
+        if x.size(1) <= 1:
+            return x
+
+        smooth = self.local_filter(x.transpose(1, 2)).transpose(1, 2)
+        high_residual = x - smooth
+        high_abs = high_residual.abs()
+
+        seq_std = x.std(dim=1, keepdim=True, unbiased=False).clamp_min(1e-4)
+        seq_std = seq_std.expand_as(x)
+        noise_ratio = (high_abs / seq_std).clamp(max=8.0)
+
+        learned_gate = self.subband_gate(torch.cat([x, smooth, high_abs, seq_std], dim=-1))
+        heuristic_gate = torch.sigmoid(1.8 * (noise_ratio - 1.0))
+        gate = learned_gate * heuristic_gate
+
+        correction = torch.tanh(self.residual_filter(torch.cat([smooth, high_residual], dim=-1)))
+        denoised = x - gate * high_residual + 0.15 * correction
+        delta = self.max_delta * torch.tanh((denoised - x) / self.max_delta)
+        mix = self.max_mix * torch.sigmoid(self.mix_logit)
+        return x + mix * delta

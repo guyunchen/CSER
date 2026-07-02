@@ -83,6 +83,8 @@ def load_checkpoint(path, device):
 
 def infer_noise_frontend(model_state):
     keys = model_state.keys()
+    if any(key.startswith("noise_block.robust.local_filter.") for key in keys):
+        return "subband_df_lite"
     if any(key.startswith("noise_block.robust.") for key in keys):
         return "gated_robust"
     if any(key.startswith("noise_block.spectral_refinement.") for key in keys):

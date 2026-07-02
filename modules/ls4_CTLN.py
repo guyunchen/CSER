@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .noiseResilient import ConservativeRobustRefinement, RobustSpectralRefinement
+from .noiseResilient import ConservativeRobustRefinement, RobustSpectralRefinement, SubBandDeepFilterLite
 from .TemporalConvEncoder import TemporalConvEncoder
 from .liquidS4 import DALS4Layer
 from .temporal_attention import TemporalAttention
@@ -30,6 +30,15 @@ class ConservativeRobustFrontend(nn.Module):
     def __init__(self, input_dim):
         super().__init__()
         self.robust = ConservativeRobustRefinement(input_dim)
+
+    def forward(self, x):
+        return self.robust(x)
+
+
+class SubBandDeepFilterLiteFrontend(nn.Module):
+    def __init__(self, input_dim):
+        super().__init__()
+        self.robust = SubBandDeepFilterLite(input_dim)
 
     def forward(self, x):
         return self.robust(x)
@@ -65,6 +74,8 @@ class LiteGLSER(nn.Module):
             self.noise_block = GatedRobustFrontend(input_dim)
         elif noise_frontend == "conservative_robust":
             self.noise_block = ConservativeRobustFrontend(input_dim)
+        elif noise_frontend == "subband_df_lite":
+            self.noise_block = SubBandDeepFilterLiteFrontend(input_dim)
         elif noise_frontend == "identity":
             self.noise_block = IdentityFrontend()
         else:

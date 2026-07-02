@@ -10,7 +10,12 @@ from modules.TemporalConvEncoder import TemporalConvEncoder
 from modules.S4 import S4Layer
 from modules.liquidS4 import DALS4Layer
 from modules.liquid_layer import OptimizedCfCLayer
-from modules.ls4_CTLN import ConservativeRobustFrontend, GatedRobustFrontend, IdentityFrontend
+from modules.ls4_CTLN import (
+    ConservativeRobustFrontend,
+    GatedRobustFrontend,
+    IdentityFrontend,
+    SubBandDeepFilterLiteFrontend,
+)
 from modules.noiseResilient import RobustSpectralRefinement
 from modules.regression_head import EmotionRegressionHead
 from modules.temporal_attention import TemporalAttention
@@ -87,6 +92,8 @@ class UnifiedSERModel(nn.Module):
             self.noise_block = GatedRobustFrontend(input_dim)
         elif noise_frontend == "conservative_robust":
             self.noise_block = ConservativeRobustFrontend(input_dim)
+        elif noise_frontend == "subband_df_lite":
+            self.noise_block = SubBandDeepFilterLiteFrontend(input_dim)
         else:
             raise ValueError(f"Unsupported noise_frontend: {noise_frontend}")
 
