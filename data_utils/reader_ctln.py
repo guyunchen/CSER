@@ -7,7 +7,7 @@ from .feature_augment import FeatureAugmentor
 from .normalization import normalize_logmel, to_float32_array
 
 
-SPEAKER_ZSCORE_MODES = {"speaker_zscore"}
+SPEAKER_STATS_MODES = {"speaker_zscore", "speaker_center", "speaker_zscore_blend"}
 
 
 class IEMOCAPDataset(Dataset):
@@ -34,7 +34,7 @@ class IEMOCAPDataset(Dataset):
         self.feature_dim = 80 if self.feature_column == "logmel_80" else 88
         self.features = self.df[self.feature_column].values
         self.speakers = self.df["speaker"].values if "speaker" in self.df.columns else None
-        self.speaker_stats = self._build_speaker_stats() if self.norm_mode in SPEAKER_ZSCORE_MODES else None
+        self.speaker_stats = self._build_speaker_stats() if self.norm_mode in SPEAKER_STATS_MODES else None
         self.v_labels = self._normalize_label(self.df["valence"].values)
         self.a_labels = self._normalize_label(self.df["arousal"].values)
         if "dominance" in self.df.columns:
@@ -86,10 +86,19 @@ class IEMOCAPDataset(Dataset):
 
     def __getitem__(self, idx):
         feat = to_float32_array(self.features[idx], feature_dim=self.feature_dim)
-        if self.norm_mode in SPEAKER_ZSCORE_MODES:
+        if self.norm_mode in SPEAKER_STATS_MODES:
             speaker = self.speakers[idx] if self.speakers is not None else "__global__"
             mean, std = self.speaker_stats.get(speaker, self.speaker_stats["__global__"])
-            feat = (feat - mean) / std
+            if self.norm_mode == "speaker_zscore":
+                feat = (feat - mean) / std
+            elif self.norm_mode == "speaker_center":
+                feat = feat - mean
+            elif self.norm_mode == "speaker_zscore_blend":
+                fixed = normalize_logmel(feat, mode="fixed_db") if self.feature_column == "logmel_80" else feat
+                zscore = (feat - mean) / std
+                feat = 0.5 * fixed + 0.5 * zscore
+            else:
+                raise ValueError(f"Unsupported speaker normalization mode: {self.norm_mode}")
         elif self.feature_column == "logmel_80":
             feat = normalize_logmel(feat, mode=self.norm_mode)
         feat = torch.tensor(feat, dtype=torch.float32)

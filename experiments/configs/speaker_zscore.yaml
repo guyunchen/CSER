@@ -61,3 +61,13 @@ experiments:
     name: best_speaker_zscore
     data:
       norm_mode: speaker_zscore
+
+  Z2:
+    name: best_speaker_center
+    data:
+      norm_mode: speaker_center
+
+  Z3:
+    name: best_speaker_zscore_blend
+    data:
+      norm_mode: speaker_zscore_blend
