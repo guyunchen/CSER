@@ -1,0 +1,75 @@
+group: best_noise_frontend
+save_checkpoints: true
+seeds: [42]
+defaults:
+  data:
+    protocol: loso
+    feature_paths:
+      - dataset/IEMOCAP/session_data/ses_1.parquet
+      - dataset/IEMOCAP/session_data/ses_2.parquet
+      - dataset/IEMOCAP/session_data/ses_3.parquet
+      - dataset/IEMOCAP/session_data/ses_4.parquet
+      - dataset/IEMOCAP/session_data/ses_5.parquet
+    metadata_paths: []
+    val_strategy: cyclic_next
+    norm_mode: fixed_db
+  loader:
+    batch_size: 32
+    num_workers: 2
+  model:
+    input_dim: 80
+    hidden_dim: 256
+    num_layers: 3
+    d_state: 32
+    p_order: 3
+    output_dim: 3
+    dropout: 0.35
+    sequence_core: da_ls4
+    noise_frontend: identity
+    remove_sequence_core: false
+    remove_attention: false
+    disable_ls4_dynamic: false
+  data_aug:
+    disable_feature_aug: false
+  label_refiner:
+    sigma: 0.05
+    apply_smoothing: true
+  loss:
+    loss_type: improved
+    ccc_weight: 0.5
+    corr_weight: 0.25
+    mse_weight: 0.15
+    smooth_weight: 0.1
+    task_importance: [1.5, 1.0, 1.0]
+  optimizer:
+    lr: 0.0003
+    weight_decay: 0.05
+  scheduler:
+    factor: 0.5
+    patience: 15
+  training:
+    epochs: 160
+    early_stop: 30
+  runtime:
+    data_parallel: true
+    amp: false
+experiments:
+  N0:
+    name: best_identity
+    model:
+      noise_frontend: identity
+
+  N1:
+    name: best_gated_robust
+    model:
+      noise_frontend: gated_robust
+
+  N2:
+    name: best_conservative_robust
+    model:
+      noise_frontend: conservative_robust
+
+  N3:
+    name: best_subband_df_lite
+    model:
+      noise_frontend: subband_df_lite
